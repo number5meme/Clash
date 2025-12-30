@@ -1,1 +1,187 @@
+基于 KeLee 魔改自用
+# 日期：2025-11-08 00:21:37
+# 配置作者：https://t.me/iKeLee
+# 适用版本：所有使用 mihomo 核心的程序
 
+proxies:
+  - name: "VPS"
+    type: vless
+    server: 
+    port: 443
+    uuid: 
+    network: tcp
+    tls: true
+    udp: true
+    flow: xtls-rprx-vision  
+    servername: 
+    client-fingerprint: chrome  
+    reality-opts:               
+      public-key: 
+      short-id: 
+
+proxy-groups:
+- name: Global
+  type: select
+  proxies:
+    - VPS
+    - DIRECT     
+    - REJECT
+
+port: 7890
+socks-port: 7891
+mixed-port: 7892
+redir-port: 7893
+tproxy-port: 7894
+
+unified-delay: true
+geodata-mode: false
+geodata-loader: standard
+geo-auto-update: true
+geo-update-interval: 24
+tcp-concurrent: true
+find-process-mode: strict
+global-client-fingerprint: chrome
+
+allow-lan: true
+mode: rule
+log-level: info
+ipv6: true
+udp: true
+
+external-controller: 0.0.0.0:9090
+# external-ui: ui
+# external-ui-url: 'https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip'
+
+geox-url:
+  # geoip: 'https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat'
+  # geosite: 'https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat'
+  mmdb: 'https://geodata.kelee.one/Country-Masaiki.mmdb'
+  asn: 'https://geodata.kelee.one/GeoLite2-ASN-P3TERX.mmdb'
+
+profile:
+  store-selected: true
+  store-fake-ip: true
+
+sniffer:
+  enable: true
+  force-dns-mapping: true
+  parse-pure-ip: true
+  override-destination: true
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443, 8443]
+  force-domain:
+    - +.v2ex.com
+  skip-domain:
+    - Mijia Cloud
+
+tun:
+  enable: true
+  stack: system
+  dns-hijack:
+    - any:53
+  auto-route: true
+  auto-detect-interface: true
+
+# P2P下载端口
+listeners:
+- name: socks5-in-1
+  type: socks
+  port: 10808
+  listen: 0.0.0.0
+  udp: true
+  users: []
+  proxy: DIRECT
+
+dns:
+  enable: true
+  prefer-h3: true
+  listen: 0.0.0.0:1053
+  ipv6: false
+  enhanced-mode: fake-ip
+  fake-ip-range: 28.0.0.1/8
+  fake-ip-filter:
+    - "*"
+    - +.lan
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+  nameserver:
+    - https://223.5.5.5/dns-query
+    - https://119.29.29.29/dns-query
+
+# 策略组参数锚点
+# 锚点 - 时延优选参数 [每 6 秒一次惰性健康检查，容差 20ms，时延超过 2 秒判定为失败，失败 3 次则自动触发健康检查]
+UrlTest: &UrlTest {type: url-test, interval: 6, tolerance: 20, lazy: true, url: 'http://www.google.com/blank.html', disable-udp: false, timeout: 2000, max-failed-times: 3, hidden: true, include-all-providers: true}
+# 锚点 - 故障转移参数 [每 6 秒一次惰性健康检查，时延超过 2 秒判定为失败，失败 3 次则自动触发健康检查]
+FallBack: &FallBack {type: fallback, interval: 6, lazy: true, url: 'http://www.google.com/blank.html', disable-udp: false, timeout: 2000, max-failed-times: 3, hidden: true, include-all-providers: true}
+# 锚点 - 负载均衡参数 [每 6 秒一次惰性健康检查，时延超过 2 秒判定为失败，失败 3 次则自动触发健康检查]
+LoadBalance: &LoadBalance {type: load-balance, interval: 6, lazy: true, url: 'http://www.google.com/blank.html', disable-udp: false, strategy: consistent-hashing, timeout: 2000, max-failed-times: 3, hidden: true, include-all-providers: true}
+# 锚点 - 规则参数 [每小时更新一次订阅规则，更新规则时使用直连策略]
+RuleProviders: &RuleProviders {type: http, behavior: classical, interval: 3600, format: yaml, proxy: DIRECT}
+
+# 订阅规则
+rule-providers:
+  LAN:
+    <<: *RuleProviders
+    path: './rules/Lan.yaml'
+    url: 'https://kelee.one/Tool/Clash/Rule/LAN_SPLITTER.yaml'
+
+  Direct:
+    <<: *RuleProviders
+    path: './rules/Direct.yaml'
+    url: 'https://kelee.one/Tool/Clash/Rule/Direct.yaml'
+
+  Proxy:
+    <<: *RuleProviders
+    path: './rules/Proxy.yaml'
+    url: 'https://kelee.one/Tool/Clash/Rule/Proxy.yaml'
+
+  Game:
+    <<: *RuleProviders
+    path: './rules/Game.yaml'
+    url: 'https://kelee.one/Tool/Clash/Rule/Game.yaml'
+
+  Steam:
+    <<: *RuleProviders
+    path: './rules/Steam.yaml'
+    url: 'https://rule.kelee.one/Clash/Steam.yaml'
+
+  Microsoft:
+    <<: *RuleProviders
+    path: './rules/Microsoft.yaml'
+    url: 'https://rule.kelee.one/Clash/Microsoft.yaml'
+
+  Google:
+    <<: *RuleProviders
+    path: './rules/Google.yaml'
+    url: 'https://rule.kelee.one/Clash/Google.yaml'
+
+  Telegram:
+    <<: *RuleProviders
+    path: './rules/Telegram.yaml'
+    url: 'https://kelee.one/Tool/Clash/Rule/Telegram.yaml'
+
+  ESET_China:
+    <<: *RuleProviders
+    path: './rules/ESET_China.yaml'
+    url: 'https://kelee.one/Tool/Clash/Rule/ESET_China.yaml'
+
+# 规则指向
+rules:
+  - RULE-SET, LAN, DIRECT
+  - RULE-SET, Direct, DIRECT
+  - RULE-SET, Proxy, Global
+  - RULE-SET, Steam, Global
+  - RULE-SET, Game, DIRECT
+  - RULE-SET, Microsoft, DIRECT
+  - RULE-SET, Google, Global
+  - RULE-SET, Telegram, Global
+  - RULE-SET, ESET_China, DIRECT
+  - GEOIP, CN, DIRECT
+  - MATCH, Global
