@@ -1,5 +1,4 @@
 基于 KeLee 魔改自用
-# 日期：2025-11-08 00:21:37
 # 配置作者：https://t.me/iKeLee
 # 适用版本：所有使用 mihomo 核心的程序
 
@@ -115,16 +114,6 @@ dns:
     - https://223.5.5.5/dns-query
     - https://119.29.29.29/dns-query
 
-# 策略组参数锚点
-# 锚点 - 时延优选参数 [每 6 秒一次惰性健康检查，容差 20ms，时延超过 2 秒判定为失败，失败 3 次则自动触发健康检查]
-UrlTest: &UrlTest {type: url-test, interval: 6, tolerance: 20, lazy: true, url: 'http://www.google.com/blank.html', disable-udp: false, timeout: 2000, max-failed-times: 3, hidden: true, include-all-providers: true}
-# 锚点 - 故障转移参数 [每 6 秒一次惰性健康检查，时延超过 2 秒判定为失败，失败 3 次则自动触发健康检查]
-FallBack: &FallBack {type: fallback, interval: 6, lazy: true, url: 'http://www.google.com/blank.html', disable-udp: false, timeout: 2000, max-failed-times: 3, hidden: true, include-all-providers: true}
-# 锚点 - 负载均衡参数 [每 6 秒一次惰性健康检查，时延超过 2 秒判定为失败，失败 3 次则自动触发健康检查]
-LoadBalance: &LoadBalance {type: load-balance, interval: 6, lazy: true, url: 'http://www.google.com/blank.html', disable-udp: false, strategy: consistent-hashing, timeout: 2000, max-failed-times: 3, hidden: true, include-all-providers: true}
-# 锚点 - 规则参数 [每小时更新一次订阅规则，更新规则时使用直连策略]
-RuleProviders: &RuleProviders {type: http, behavior: classical, interval: 3600, format: yaml, proxy: DIRECT}
-
 # 订阅规则
 rule-providers:
   LAN:
@@ -174,6 +163,12 @@ rule-providers:
 
 # 规则指向
 rules:
+  - DOMAIN-SUFFIX,xoyocdn.com,DIRECT
+  - DOMAIN-SUFFIX,xoyo.com,DIRECT
+  - DOMAIN-SUFFIX,kingsoft.com,DIRECT
+  - PROCESS-NAME,JX3ClientX64.exe,DIRECT
+  - PROCESS-NAME,SeasunGame.exe,DIRECT
+
   - RULE-SET, LAN, DIRECT
   - RULE-SET, Direct, DIRECT
   - RULE-SET, Proxy, Global
