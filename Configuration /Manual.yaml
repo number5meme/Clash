@@ -85,13 +85,6 @@ dns:
   fake-ip-filter:
     - "*.lan"
     - "*.localhost"
-    - "stun.*" 
-    # Game
-    - "+.xoyo.com"
-    - "+.xoyocdn.com"
-    - "+.xgsdk.com"
-    - "+.kingsoft.com"
-    - "+.jx3.xoyo.com"
 
   # 默认 DNS
   nameserver:
@@ -194,17 +187,6 @@ rule-providers:
 
 # 11. 规则
 rules:
-  - PROCESS-NAME,JX3ClientX64.exe,DIRECT
-  - PROCESS-NAME,SeasunGame.exe,DIRECT
-  - PROCESS-NAME,LeagueClientUx.exe,DIRECT
-  - PROCESS-NAME,LeagueClient.exe,DIRECT
-  - PROCESS-NAME,wegame.exe,DIRECT
-  - DOMAIN-SUFFIX,xoyocdn.com,DIRECT
-  - DOMAIN-SUFFIX,xoyo.com,DIRECT
-  - DOMAIN-SUFFIX,xoyocdn.com,DIRECT
-  - DOMAIN-SUFFIX,xgsdk.com,DIRECT
-  - DOMAIN-SUFFIX,kingsoft.com,DIRECT
-
   - RULE-SET, LAN, DIRECT
   - RULE-SET, Direct, DIRECT
   - RULE-SET, Game, DIRECT
