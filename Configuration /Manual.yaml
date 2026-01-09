@@ -1,33 +1,37 @@
-# 基于 KeLee 魔改自用
+# 魔改自用
 # Date: 2026-01-01
 
 # 1. 基础端口设置
 port: 7890
 socks-port: 7891
-mixed-port: 7892
+mixed-port: 7892 # 混合端口 同时支持 HTTP(S) 和 SOCKS5 协议
 redir-port: 7893
 tproxy-port: 7894
 
 # 2. 允许局域网 & IPv6
-allow-lan: true
-ipv6: true 
-mode: rule
-log-level: info
-unified-delay: true
-tcp-concurrent: true 
+allow-lan: true # 允许其他设备通过 Clash 的代理端口访问互联网
+ipv6: true # 内核接受 IPv6 流量
+mode: rule # 运行模式 rule/global/direct,暂不支持 script
+log-level: info # 日志等级 debug/info/warning/error/silent
+unified-delay: true # 统一延迟,会计算 RTT,以消除连接握手等带来的不同类型节点的延迟差异
+tcp-concurrent: true # 并发向所有 IP 发起 TCP 连接,选择最快握手成功的结果
 
 # 3. 外部控制
-external-controller: 127.0.0.1:9090
-secret: ""
-# external-ui: ui
-# external-ui-url: 'https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip'
+external-controller: 127.0.0.1:9090 # API 监听地址
+external-controller-cors: # API CORS 标头配置
+  allow-origins: # 允许哪些前端页面的域名访问 API
+    - 127.0.0.1
+    - https://board.zash.run.place
+  allow-private-network: false
+external-ui: ./ui # WebUI 的保存路径
+external-ui-url: 'https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip' # WebUI 下载地址
 
 geodata-mode: false
 geodata-loader: standard
 geo-auto-update: true
 geo-update-interval: 24
 find-process-mode: strict
-global-client-fingerprint: chrome
+global-client-fingerprint: chrome # 全局 TLS 指纹,优先低于 proxy 内的 client-fingerprint
 
 geox-url:
   # geoip: 'https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat'
@@ -76,27 +80,23 @@ proxy-groups:
 
 # 6. DNS 设置
 dns:
-  enable: true
-  listen: 0.0.0.0:1053
-  ipv6: true
-  prefer-h3: true
-  enhanced-mode: fake-ip
-  fake-ip-range: 198.18.0.1/16
-  fake-ip-filter:
+  enable: true # 如为 false,则使用系统 DNS 解析
+  listen: 0.0.0.0:53
+  ipv6: true # false 将返回 AAAA 的空结果
+  prefer-h3: true # 是否开启DOH的http/3
+  respect-rules: true # dns 连接遵守路由规则,需配置 proxy-server-nameserver
+  enhanced-mode: fake-ip # DNS 处理模式 redir-host/fake-ip
+  fake-ip-range: 28.0.0.1/8 # fakeip下的IP段设置, tun网卡的默认ip也使用此值
+  fake-ip-filter: #fakeip过滤,以下地址不会下发fakeip映射用于连接
     - "*.lan"
-    - "*.localhost"
-
-  # 默认 DNS
-  nameserver:
+    - "*.localhost"  
+  nameserver: # 默认域名解析,如不配置 fallback/proxy-server-nameserver,则都由 nameserver 解析
     - https://223.5.5.5/dns-query
     - https://doh.pub/dns-query
-
-  # 后备 DNS
-  fallback:
+  fallback: # 后备域名解析服务器,一般情况下使用境外DNS,保证结果可信。配置fallback后默认启用fallback-filter,geoip-code为cn
     - https://1.1.1.1/dns-query
     - https://8.8.8.8/dns-query
- 
-  fallback-filter:
+  fallback-filter: # 后备域名解析服务器筛选,满足条件的将使用fallback结果或只使用fallback解析
     geoip: true
     geoip-code: CN
     ipcidr:
@@ -104,16 +104,18 @@ dns:
     domain:
       - "+.google.com"
       - "+.facebook.com"
-      - "+.twitter.com"
+      - "+.twitter.com"   
 
 # 7. Tun 模式
 tun:
   enable: true
-  stack: system
-  auto-route: true
-  auto-detect-interface: true
-  dns-hijack:
+  stack: system # tun 模式堆栈 system/gvisor/mixed 防火墙未放行内核,则无法使用 system 和 mixed 协议栈
+  strict-route: false # 严格路由 所有连接路由到 tun 来防止泄漏,但设备将无法被其他设备访问
+  auto-route: true # 自动设置全局路由,可以自动将全局流量路由进入 tun 网卡
+  auto-detect-interface: true # 自动选择流量出口接口,多出口网卡同时连接的设备建议手动指定出口网卡
+  dns-hijack: # 在 MacOS/Windows 无法自动劫持发往局域网的 dns 请求
     - any:53
+    - tcp://any:53
 
 # 8. 嗅探器
 sniffer:
@@ -145,39 +147,88 @@ RuleProviders: &RuleProviders {type: http, behavior: classical, interval: 86400,
 
 rule-providers:
   LAN:
+      <<: *RuleProviders
     url: 'https://kelee.one/Tool/Clash/Rule/LAN_SPLITTER.yaml'
     path: './rules/Lan.yaml'
 
   Direct:
+      <<: *RuleProviders
     url: 'https://kelee.one/Tool/Clash/Rule/Direct.yaml'
     path: './rules/Direct.yaml'
 
   Proxy:
+      <<: *RuleProviders
     url: 'https://kelee.one/Tool/Clash/Rule/Proxy.yaml'
     path: './rules/Proxy.yaml'
 
   Game:
+      <<: *RuleProviders
     url: 'https://kelee.one/Tool/Clash/Rule/Game.yaml'
     path: './rules/Game.yaml'
 
   Steam:
+      <<: *RuleProviders
     url: 'https://rule.kelee.one/Clash/Steam.yaml'
     path: './rules/Steam.yaml'
 
   Microsoft:
+      <<: *RuleProviders
     url: 'https://rule.kelee.one/Clash/Microsoft.yaml'
     path: './rules/Microsoft.yaml'
 
   Google:
+      <<: *RuleProviders
     url: 'https://rule.kelee.one/Clash/Google.yaml'
     path: './rules/Google.yaml'
 
   ESET_China:
+      <<: *RuleProviders
     url: 'https://kelee.one/Tool/Clash/Rule/ESET_China.yaml'
     path: './rules/ESET_China.yaml'
 
+  site_webrtc:
+    type: inline
+    <<: *site_rule
+    payload:
+      - '+.stun.*'
+      - '+.stun*.*'
+      - '+.stun.*.*'
+      - '+.stun*.*.*'
+      - '+.stun.*.*.*'
+      - '+.stun*.*.*.*'
+      - '+.turn.*'
+      - '+.turn*.*'
+      - '+.turn.*.*'
+      - '+.turn*.*.*'
+      - '+.turn.*.*.*'
+      - '+.turn*.*.*.*'
+      - 'fwa.lifesizecloud.com'
+      - 'hw-v2-web-player-tracker.biliapi.net'
+      - 'iphone-stun.strato-iphone.de'
+      - 'ipv4.am.i.mullvad.net'
+      - 'ipv6.am.i.mullvad.net'
+      - 'meet-jit-si-turnrelay.jitsi.net'
+      - 'numb.viagenie'
+      - 'relay.webwormhole.io'
+      - 's1.taraba.net'
+      - 's1.voipstation.jp'
+      - 's2.taraba.net'
+      - 's2.voipstation.jp'
+
+    ip_webrtc:
+    type: inline
+    <<: *ip_rule
+    payload:
+      - '124.64.206.224/32'
+      - '23.21.150.121/32'
+      - '39.107.142.158/32'
+      
 # 11. 规则
 rules:
+  - AND,((DST-PORT,53),(NOT,((IN-TYPE,Inner)))),dns-hijack # 劫持 DNS 到 Clash 内部 DNS 模块
+  - RULE-SET,ip_private,Local,no-resolve # 局域网
+  - AND,((NETWORK,udp),(RULE-SET,site_webrtc)),WebRTC # 是否禁用 stun/turn 协议的 UDP 数据,禁用后可以有效解决 WebRTC 的 IP 泄露
+  - AND,((NETWORK,udp),(RULE-SET,ip_webrtc)),WebRTC
   - RULE-SET, LAN, DIRECT
   - RULE-SET, Direct, DIRECT
   - RULE-SET, Game, DIRECT
