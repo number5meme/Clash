@@ -145,45 +145,36 @@ RuleProviders: &RuleProviders {type: http, behavior: classical, interval: 86400,
 
 rule-providers:
   LAN:
-    <<: *RuleProviders
     url: 'https://kelee.one/Tool/Clash/Rule/LAN_SPLITTER.yaml'
     path: './rules/Lan.yaml'
 
   Direct:
-    <<: *RuleProviders
     url: 'https://kelee.one/Tool/Clash/Rule/Direct.yaml'
     path: './rules/Direct.yaml'
 
   Proxy:
-    <<: *RuleProviders
     url: 'https://kelee.one/Tool/Clash/Rule/Proxy.yaml'
     path: './rules/Proxy.yaml'
 
   Game:
-    <<: *RuleProviders
     url: 'https://kelee.one/Tool/Clash/Rule/Game.yaml'
     path: './rules/Game.yaml'
 
   Steam:
-    <<: *RuleProviders
     url: 'https://rule.kelee.one/Clash/Steam.yaml'
     path: './rules/Steam.yaml'
 
   Microsoft:
-    <<: *RuleProviders
     url: 'https://rule.kelee.one/Clash/Microsoft.yaml'
     path: './rules/Microsoft.yaml'
 
   Google:
-    <<: *RuleProviders
     url: 'https://rule.kelee.one/Clash/Google.yaml'
     path: './rules/Google.yaml'
 
   ESET_China:
-    <<: *RuleProviders
     url: 'https://kelee.one/Tool/Clash/Rule/ESET_China.yaml'
     path: './rules/ESET_China.yaml'
-
 
 # 11. 规则
 rules:
