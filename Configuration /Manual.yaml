@@ -40,44 +40,9 @@ geox-url:
   asn: 'https://geodata.kelee.one/GeoLite2-ASN-P3TERX.mmdb'
 
 # 4. 代理节点
-proxies:
-  - name: "***"
-    type: vless
-    server: ***
-    port: 443
-    uuid: ***
-    network: tcp
-    tls: true
-    udp: true
-    flow: xtls-rprx-vision
-    servername: ***
-    client-fingerprint: ***
-    reality-opts:
-      public-key: ***
-      short-id: ***
 
 # 5. 策略组
-proxy-groups:
-  - name: "Global"
-    type: select
-    proxies:
-      - "***"
-      - "DIRECT"
-
-  # 游戏平台
-  - name: "Game"
-    type: select
-    proxies:
-      - "DIRECT"
-      - "Global"
-
-  # 微软服务
-  - name: "Microsoft"
-    type: select
-    proxies:
-      - "DIRECT"
-      - "Global"
-
+      
 # 6. DNS 设置
 dns:
   enable: true # 如为 false,则使用系统 DNS 解析
@@ -185,10 +150,15 @@ rule-providers:
       <<: *RuleProviders
     url: 'https://kelee.one/Tool/Clash/Rule/ESET_China.yaml'
     path: './rules/ESET_China.yaml'
+  
+  AI:
+    <<: *RuleProviders
+    url: 'https://raw.githubusercontent.com/number5meme/Clash/refs/heads/main/AI.yaml'
+    path: './rules/AI.yaml'
 
   site_webrtc:
     type: inline
-    <<: *site_rule
+    behavior: domain
     payload:
       - '+.stun.*'
       - '+.stun*.*'
@@ -215,9 +185,9 @@ rule-providers:
       - 's2.taraba.net'
       - 's2.voipstation.jp'
 
-    ip_webrtc:
+  ip_webrtc:
     type: inline
-    <<: *ip_rule
+    behavior: domain
     payload:
       - '124.64.206.224/32'
       - '23.21.150.121/32'
@@ -225,10 +195,6 @@ rule-providers:
       
 # 11. 规则
 rules:
-  - AND,((DST-PORT,53),(NOT,((IN-TYPE,Inner)))),dns-hijack # 劫持 DNS 到 Clash 内部 DNS 模块
-  - RULE-SET,ip_private,Local,no-resolve # 局域网
-  - AND,((NETWORK,udp),(RULE-SET,site_webrtc)),WebRTC # 是否禁用 stun/turn 协议的 UDP 数据,禁用后可以有效解决 WebRTC 的 IP 泄露
-  - AND,((NETWORK,udp),(RULE-SET,ip_webrtc)),WebRTC
   - RULE-SET, LAN, DIRECT
   - RULE-SET, Direct, DIRECT
   - RULE-SET, Game, DIRECT
@@ -237,6 +203,7 @@ rules:
   - RULE-SET, Steam, Game
   - RULE-SET, Microsoft, Microsoft
   - RULE-SET, Google, Global
+  - RULE-SET, AI, Global
   - RULE-SET, Proxy, Global
 
   - GEOIP, CN, DIRECT
